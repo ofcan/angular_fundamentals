@@ -72,7 +72,7 @@ Controller doesn't know anything about the view; it 'communicates' with view via
 **customers** - a scope property
 Note that we can also acces the 'query' thingy inside SimpleController function (because of the $scope).
 
-## Modules, Routes and Factories
+## Modules
 
 ![Module](/images/module.png)
 
@@ -81,7 +81,8 @@ Note that we can also acces the 'query' thingy inside SimpleController function 
     var demoApp = angular.module('demoApp', ['helperModule']);
 
 **'helperModule'** - module that demoApp depends on
-Here's another example:
+
+#### Example A: using anonymous function
 
     var demoApp = angular.module('demoApp', []);
 
@@ -92,3 +93,35 @@ Here's another example:
         {name:'Bob', city:'RI'}
       ];
     });
+
+#### Example B: creating controller outside the .controller call
+
+    var demoApp = angular.module('demoApp', []);
+
+    function SimpleController($scope) {
+      $scope.customers = [
+        {name:'John', city:'NY'},
+        {name:'Mark', city:'ZG'},
+        {name:'Bob', city:'RI'}
+      ];
+    }
+
+    demoApp.controller('SimpleController', SimpleController)
+
+#### Example C: Using .controllers option (for prototyping)
+
+    var demoApp = angular.module('demoApp', []);
+
+    var controllers = {};
+
+    controllers.SimpleController = function ($scope) {
+      $scope.customers = [
+        {name:'John', city:'NY'},
+        {name:'Mark', city:'ZG'},
+        {name:'Bob', city:'RI'}
+      ];
+    }
+
+    demoApp.controller(controllers)
+
+## Routes
