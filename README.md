@@ -2,6 +2,7 @@
 
 ![General overview](/images/general_overview.png)
 
+Angular is very very modular if you take advantage of it.
 Great for **SPA** apps
 
 ### Usage
@@ -72,3 +73,22 @@ Controller doesn't know anything about the view; it 'communicates' with view via
 Note that we can also acces the 'query' thingy inside SimpleController function (because of the $scope).
 
 ## Modules, Routes and Factories
+
+![Module](/images/module.png)
+
+**Module** is like an object container. This is how we create modules:
+
+    var demoApp = angular.module('demoApp', ['helperModule']);
+
+**'helperModule'** - module that demoApp depends on
+Here's another example:
+
+    var demoApp = angular.module('demoApp', []);
+
+    demoApp.controller('SimpleController', function ($scope) {
+      $scope.customers = [
+        {name:'John', city:'NY'},
+        {name:'Mark', city:'ZG'},
+        {name:'Bob', city:'RI'}
+      ];
+    });
