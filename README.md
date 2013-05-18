@@ -1,8 +1,7 @@
 # Angular Basics (and a small app)
 
-### Overview
-
-![General overview](/images/general_overview.png)
+Angular is very very modular if you take advantage of it.
+Great for **SPA** apps
 
 * [Directives and Data-bindings](#directives-and-data-bindings)
     * [Basic behaviours](#basic-behaviours)
@@ -12,8 +11,10 @@
     * [Isolate Scope @](#isolate-scope-at)
     * [Isolate Scope =](#isolate-scope-equals)
     * [Isolate Scope &](#isolate-scope-and)
+* [Transclusion](#transclusion)
 * [Filters](#filters)
 * [Views, Controllers and Scope](#views-controllers-and-scope)
+    * [Creating Controllers](#creating-controllers)
     * [Sharing code between controllers](#sharing-code-between-controllers)
     * [Directives talking to controllers](#directives-talking-to-controllers)
 * [Modules](#modules)
@@ -24,8 +25,7 @@
     * [Don't reference scope inside of the function](#dont-reference-scope-inside-of-the-function)
     * [Restrict custom directives to attributes](#restrict-custom-directives-to-attributes)
 
-Angular is very very modular if you take advantage of it.
-Great for **SPA** apps
+![General overview](/images/general_overview.png)
 
 ### Usage
 
@@ -273,6 +273,10 @@ separate message
 
 ## Isolate Scope
 
+![Scopes](/images/scopes.png)
+
+Immediately when you call a scope upon defining a directive you separate it from
+parent scope.
 It is best to observe isolate scope on a simple example
 
     <div ng-app='choreApp'>
@@ -340,8 +344,125 @@ around it.
     // for example: 'Clean your room is done!'
 
 ### Isolate scope at
+
+    <div drink></div>
+
+    var app = angular.module('drinkApp', []);
+
+    app.controller('appController', function ($scope) {
+    };
+
+    app.directive('drink', function () {
+      return {
+        template: '<div>{{ flavor }}</div>'
+        link: function (scope) {
+          scope.flavor = 'cherry';
+        }
+      }
+    });
+
+Above just returns > cherry
+
+    <div drink flavor='strawberry'></div>
+
+    var app = angular.module('drinkApp', []);
+
+    app.controller('appController', function ($scope) {
+    };
+
+    app.directive('drink', function () {
+      return {
+        template: '<div>{{ flavor }}</div>'
+        link: function (scope, element, attrs) {
+          scope.flavor = attrs.flavor
+        }
+      }
+    });
+
+We can replace the directive above like this and still get the same result:
+
+    app.directive('drink', function () {
+      return {
+        scope:{
+          flavor:'@'
+        }
+        template: '<div>{{ flavor }}</div>'
+      }
+    });
+
 ### Isolate scope equals
+
+Set up a binding both ways, meaning anything that is updated in the directive
+itself will also update everything in the controller scope.
+
+    <div drink flavor=Flavor></div>
+
+    var app = angular.module('drinkApp', []);
+
+    app.controller('appController', function ($scope) {
+      $scope.Flavor = 'blackberry'
+    };
+
+    app.directive('drink', function () {
+      return {
+        scope:{
+          flavor:'='
+        }
+        template: '<div>{{ flavor }}</div>'
+      }
+    });
+
+Now the thing doesn't expect the string but the object to bind to.
+
 ### Isolate scope and
+
+Allows you to invoke, evaluate, call etc an expression on the parent scope of
+whatever directive it is inside of.
+
+    <div phone dial='callHome(message)'></div>
+
+    var app = angular.module('drinkApp', []);
+
+    app.controller('appContrller', function ($scope) {
+      $scope.callHome = function (message) {
+        alert(message)
+      }
+    });
+
+    app.directive('phone', function () {
+      return {
+        scope:{
+          dial:"&" // means if we invoke dial and pass in an object (like we do
+                   // below) with message as the name, and value as the value,
+                   // than we can communicate with controller from the directive
+        },
+        template:'<input type='text ng-model='value'>' +
+                 '<div class='button' ng-click='dial({message:value})'>Call home!</div>'
+      }
+    }
+
+## Transclusion
+
+Transclusion basicly yanks 'What' from the example below into wherever you
+define ng-trancslude. Without transclusion, 'What' text would have been
+completely overwritten.
+
+    <hero>
+      <p>What</p>
+    </hero>
+
+    var app = angular.module('App', []);
+
+    app.controller('appContrller', function ($scope) {
+    });
+
+    app.directive('hero', function () {
+      return {
+        restrict: 'E',
+        transclude: true,
+        template: '<div class='hero' ng-transclude>Hello</div>
+      }
+    });
 
 ## Filters
 
@@ -405,6 +526,54 @@ Controller doesn't know anything about the view; it 'communicates' with view via
 
 **customers** - a scope property
 Note that we can also acces the 'query' thingy inside SimpleController function (because of the $scope).
+
+### Creating Controllers
+
+#### Example A: using anonymous function
+
+    var demoApp = angular.module('demoApp', []);
+
+    demoApp.controller('SimpleController', function ($scope) {
+      $scope.customers = [
+        {name:'John', city:'NY'},
+        {name:'Mark', city:'ZG'},
+        {name:'Bob', city:'RI'}
+      ];
+    });
+
+#### Example B: creating controller outside the .controller call
+
+    var demoApp = angular.module('demoApp', []);
+
+    function SimpleController($scope) {
+      $scope.customers = [
+        {name:'John', city:'NY'},
+        {name:'Mark', city:'ZG'},
+        {name:'Bob', city:'RI'}
+      ];
+    }
+
+    demoApp.controller('SimpleController', SimpleController)
+
+#### Example C: Using .controllers option (for prototyping)
+
+Btw, in the same fashion you can create directives and the like (doesn't work on
+filters though).
+
+    var demoApp = angular.module('demoApp', []);
+
+    var controllers = {};
+
+    controllers.SimpleController = function ($scope) {
+      $scope.customers = [
+        {name:'John', city:'NY'},
+        {name:'Mark', city:'ZG'},
+        {name:'Bob', city:'RI'}
+      ];
+    }
+
+    demoApp.controller(controllers)
+
 
 ### Sharing code between controllers
 
@@ -486,48 +655,6 @@ maintain.
     var demoApp = angular.module('demoApp', ['helperModule']);
 
 **'helperModule'** - module that demoApp depends on
-
-#### Example A: using anonymous function
-
-    var demoApp = angular.module('demoApp', []);
-
-    demoApp.controller('SimpleController', function ($scope) {
-      $scope.customers = [
-        {name:'John', city:'NY'},
-        {name:'Mark', city:'ZG'},
-        {name:'Bob', city:'RI'}
-      ];
-    });
-
-#### Example B: creating controller outside the .controller call
-
-    var demoApp = angular.module('demoApp', []);
-
-    function SimpleController($scope) {
-      $scope.customers = [
-        {name:'John', city:'NY'},
-        {name:'Mark', city:'ZG'},
-        {name:'Bob', city:'RI'}
-      ];
-    }
-
-    demoApp.controller('SimpleController', SimpleController)
-
-#### Example C: Using .controllers option (for prototyping)
-
-    var demoApp = angular.module('demoApp', []);
-
-    var controllers = {};
-
-    controllers.SimpleController = function ($scope) {
-      $scope.customers = [
-        {name:'John', city:'NY'},
-        {name:'Mark', city:'ZG'},
-        {name:'Bob', city:'RI'}
-      ];
-    }
-
-    demoApp.controller(controllers)
 
 ## Routes
 
@@ -638,4 +765,3 @@ appears:
         }
       }
     });
-;
