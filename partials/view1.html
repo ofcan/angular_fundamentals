@@ -1,0 +1,21 @@
+<!--
+  Note that this view doesn't know anything about the controller
+    - that happens through the route
+-->
+<h1>View 1</h1>
+
+<ul>
+  <li ng-repeat='cust in customers'>{{ cust.name }} - {{ cust.city }}</li>
+</ul>
+
+<br>
+
+New customer name:<br>
+<input type='text' ng-model='newCustomer.name' /><br>
+
+New customer city:<br>
+<input type='text' ng-model='newCustomer.city' /><br>
+
+<button ng-click='addNewCustomer()'>Add Customer</button>
+
+<a href='#/view2'>View 2</a>

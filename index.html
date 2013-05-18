@@ -8,25 +8,69 @@
 
   <body>
 
-    <div class='container' ng-controller='SimpleController'>
-      <h1>Hello world!</h1>
-      Name: <input type='text' ng-model='query' />
-      <ul>
-        <li ng-repeat="cust in customers | filter:query | orderBy:'city'">{{ cust.name }} - {{ cust.city }}</li>
-      <ul>
+    <div class='container'>
+      <!-- Placeholder for the Views -->
+      <div data-ng-view=""></div>
     </div>
 
     <script src='scripts/angular.min.js'></script>
 
     <script>
+
       var demoApp = angular.module('demoApp', []);
 
-      function SimpleController($scope) {
-        $scope.customers = [
+      demoApp.config(function ($routeProvider) {
+        $routeProvider
+          .when('/',
+            {
+              controller: 'SimpleController',
+              templateUrl: 'partials/view1.html'
+            })
+          .when('/view2',
+            {
+              controller: 'SimpleController',
+              templateUrl: 'partials/view2.html'
+            })
+          .otherwise({ redirectTo: '/' });
+      });
+
+      demoApp.factory('simpleFactory', function () {
+        var customers = [
           {name:'John', city:'NY'},
           {name:'Mark', city:'ZG'},
           {name:'Bob', city:'RI'}
         ];
+
+        var factory = {};
+        factory.getCustomers = function () {
+          return customers;
+        };
+
+        return factory;
+
+      });
+
+      function SimpleController($scope, simpleFactory) {
+        $scope.customers = simpleFactory.getCustomers();
+
+        // It is a good practice though to get all your initialization in one method
+        // to kind of get things going
+
+        //$scope.customers = [];
+        //init();
+        //function init() {
+        //  $scope.customers = simpleFactory.getCustomers();
+        //}
+
+
+        $scope.addNewCustomer = function() {
+          $scope.customers.push(
+            {
+              name: $scope.newCustomer.name,
+              city: $scope.newCustomer.city
+            }
+          )
+        };
       }
 
       demoApp.controller('SimpleController', SimpleController)
