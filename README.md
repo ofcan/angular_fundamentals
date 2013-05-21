@@ -3,6 +3,7 @@
 Angular is very very modular if you take advantage of it.
 Great for **SPA** apps
 
+* [Modules](#modules)
 * [Directives and Data-bindings](#directives-and-data-bindings)
     * [Basic behaviours](#basic-behaviours)
     * [Directive to Directive communication](#directive-to-directive-communication)
@@ -16,11 +17,13 @@ Great for **SPA** apps
 * [Angular Element](#angular-element)
     * [Compile](#compile)
 * [Filters](#filters)
-* [Views, Controllers and Scope](#views-controllers-and-scope)
+* [TemplateUrl](#templateUrl)
+* [Views](#views)
+* [Controllers and Scope](#controllers-and-scope)
     * [Creating Controllers](#creating-controllers)
     * [Sharing code between controllers](#sharing-code-between-controllers)
     * [Directives talking to controllers](#directives-talking-to-controllers)
-* [Modules](#modules)
+    * [Scope vs scope](#scope-vs-scope)
 * [Routes](#routes)
 * [Factories, Services, Providers, Values](#factories-services-providers-values)
 * [Testing](#testing)
@@ -39,6 +42,16 @@ parameters prohibit browsing file:// URL.  To fix this set up a small server in
 the folder of this app like so:
 
     python -m SimpleHTTPServer 8000
+
+## Modules
+
+![Module](/images/module.png)
+
+**Module** is like an object container. This is how we create modules:
+
+    var demoApp = angular.module('demoApp', ['helperModule']);
+
+**'helperModule'** - module that demoApp depends on
 
 ## Directives and Data Bindings
 
@@ -593,7 +606,63 @@ Ofcourse, you can inject data into your custom filters
 
 Angular provides A LOT of default filters:
 
-## Views, Controllers and Scope
+## TemplateUrl
+
+Templates you create with directives and such usually are much much more
+complicated for a single strings, so angular uses templateUrl!
+
+    <my-directive></my-directive>
+
+    var app = angular.module('myApp', []);
+
+    app.directive('myDirective', function (scope) {
+      restrict: 'E',
+      return {
+        templateUrl:'my_template.html',
+      }
+    });
+
+In the example above, everything inside my_template.html is going to render
+inside my-directive div.
+
+On a more technical level, [the templateUrl is just looking up the template cache
+with the corresponding key.](http://www.egghead.io/video/boBm3AU-uX4)
+
+## Views
+
+This is why Angular kick ass when it comes to SPA apps:
+
+    <ng-view></ng-view>
+
+    var app = angular.module('myApp', []);
+
+    app.config(function($routeProvider) {
+      $routeProvider
+        .when('/',
+          {
+            templateUrl: app.html,
+            controller: appController'
+          })
+        .when('pizza',
+          {
+            template: 'Yum!',
+          })
+        .otherwise({
+          template: 'This doesnt exist'
+        })
+    });
+
+    app.controller('appController, function ($scope) {
+      $scope.model = {
+        message: 'This is my app!'
+      }
+    });
+
+And this is the content of app.html:
+
+    <h1>{{ model.message }}</h1>
+
+## Controllers and Scope
 
 VIEW <--- $scope ---> CONTROLLER
 
@@ -739,15 +808,32 @@ maintain.
       }
     });
 
-## Modules
+### Scope vs scope
 
-![Module](/images/module.png)
+Take a look at the example below. What is the difference between $scope and
+scope?
 
-**Module** is like an object container. This is how we create modules:
+    var app = angular.module('myApp', []);
 
-    var demoApp = angular.module('demoApp', ['helperModule']);
+    app.controller('myController', function ($scope) {
+    });
 
-**'helperModule'** - module that demoApp depends on
+    app.directive('myDirective', function (scope) {
+      return {
+        link: function (scope) {
+        }
+      }
+    });
+
+In the directive, when we define `(scope, element)` etc, **the order matters**.
+You can name those things whatever you wish, they'll still mark scope,
+element...
+
+On the other hand, in the controller, when we define `($scope)`, that is the
+angular variable - meaning you cannot name it whatever you want, but you can
+order them in any way that suits you.
+
+But in this case, they both mark the same thing / the same scope. :)
 
 ## Routes
 
@@ -769,6 +855,32 @@ maintain.
           })
         .otherwise({ redirectTo: '/' });
     });
+
+### Route params
+
+    <h1>{{ model.message }}</h1>
+
+    var demoApp = angular.module('demoApp', []);
+
+    demoApp.config(function ($routeProvider) {
+      $routeProvider
+        .when('/map/:country/:city',
+          {
+            controller: 'SimpleController',
+            templateUrl: 'app.html'
+          })
+    });
+
+    demoApp.controller('simpleController', function ($scope, $routeParams) {
+      $scope.model = {
+        message: 'Address: ' + 
+          $routeParams.country + ', ' +
+          $routeParams.city
+      }
+    });
+
+Visiting /map/croatia/zagreb url types out on the page 'Address: croatia,
+zagreb'
 
 ## Factories, Services, Providers, Values
 
