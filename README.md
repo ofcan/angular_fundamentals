@@ -25,6 +25,7 @@ Great for **SPA** apps
     * [Directives talking to controllers](#directives-talking-to-controllers)
     * [Scope vs scope](#scope-vs-scope)
 * [Routes](#routes)
+* [Promises](#promises)
 * [Factories, Services, Providers, Values](#factories-services-providers-values)
 * [Testing](#testing)
 * [Good Practices](#good-practices)
@@ -881,6 +882,27 @@ But in this case, they both mark the same thing / the same scope. :)
 
 Visiting /map/croatia/zagreb url types out on the page 'Address: croatia,
 zagreb'
+
+## Promises
+
+The CommonJS Promise proposal describes a promise as an interface for
+interacting with an object that represents the result of an action that is
+performed asynchronously, and may or may not be finished at any given point in
+time.
+
+From the perspective of dealing with error handling, deferred and promise APIs
+are to asynchronous programming what try, catch and throw keywords are to
+synchronous programming.
+
+![Promise](/images/promise.png)
+
+* **defer.promise** > this is something that is going to happen in the future
+* **defer.resolve** > this is when it happens in the future
+
+You can also chain these .then statements and pass things into resolve like
+below:
+
+![chained promise](/images/chained_promises.png)
 
 ## Factories, Services, Providers, Values
 
