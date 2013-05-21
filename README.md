@@ -26,6 +26,7 @@ Great for **SPA** apps
     * [Scope vs scope](#scope-vs-scope)
 * [Routes](#routes)
 * [Promises](#promises)
+    * [Resolve](#resolve)
 * [Factories, Services, Providers, Values](#factories-services-providers-values)
 * [Testing](#testing)
 * [Good Practices](#good-practices)
@@ -504,6 +505,8 @@ completely overwritten.
       }
     });
 
+Now the text says: What Hello
+
 ## Angular Element
 
 Let's examine how angular elements differ from elements in other frameworks
@@ -890,6 +893,8 @@ interacting with an object that represents the result of an action that is
 performed asynchronously, and may or may not be finished at any given point in
 time.
 
+**Angular uses $q library for promises.**
+
 From the perspective of dealing with error handling, deferred and promise APIs
 are to asynchronous programming what try, catch and throw keywords are to
 synchronous programming.
@@ -904,10 +909,103 @@ below:
 
 ![chained promise](/images/chained_promises.png)
 
+### Resolve
+
+Resolve property is basically a list of promises that need to happen before your
+controller will instantiate.
+It's way to tell routing: 'Hang on, I've got some stuff I need to do 1st'
+
+    app.config(function(routeProvider) {
+      $routeProvider
+        .when('/',
+          templateUrl: 'app.html',
+          controller: 'appController',
+          resolve: {
+            app: function ($q) {
+              var defer = $q.defer();
+              defer.resolve();
+              return defer.promise;
+            }
+          }
+        )
+    });
+
+A lot of the times you'll see the example with the timeout functionality:
+
+          resolve: {
+            app: function ($q, $timeout) {
+              var defer = $q.defer();
+              $timeout(function() {
+                defer.resolve();
+              }, 2000)
+              return defer.promise;
+            }
+          }
+
+#### Resolve conventions:
+
+Majority of the time you're using resolve, you're associating it with
+controller. So people just create the controller as the variable and attach
+resolve as a property.
+
+    app.config(function(routeProvider) {
+      $routeProvider
+        .when('/',
+          templateUrl: 'app.html',
+          controller: 'appController',
+          resolve: {
+            load_our_data: appController.loadData
+            prep_our_data: appController.prepData
+          }
+        )
+    });
+
+    var appController = app.controller('appController', function ($scope) {
+      $scope.model = {
+        message: 'I am great!'
+      }
+    });
+
+    appController.loadData = function ($q, $timeout) {
+                               var defer = $q.defer();
+                               $timeout(function(){
+                                 defer.resolve();
+                               }, 2000)
+                               return defer.promise;
+                             }
+
+    appController.prepData = function ($q, $timeout) {
+                               var defer = $q.defer();
+                               $timeout(function() {
+                                 defer.resolve();
+                               }, 2000)
+                               return defer.promise;
+                             }
+
+Both of these resolve functions happen at the same time btw.
+
 ## Factories, Services, Providers, Values
 
 These are just different ways to get data for your app.  Well just be looking at
 **Factories**
+
+Factories are a common use paradigm as they allow you to configure a function
+that returns an object which you can than inject into controllers. Here's a
+basic example:
+
+    var app = angular.module('app', []);
+
+    app.factory('game', function() {
+      return {
+        title: 'StarCraft'
+      }
+    });
+
+    app.controller('appController', function($scope, game) {
+      $scope.title = game.title
+    });
+
+And another example:
 
     var demoApp = angular.module('demoApp', [])
       .factory('simpleFactory', function () {
