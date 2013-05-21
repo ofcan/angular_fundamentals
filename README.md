@@ -7,11 +7,14 @@ Great for **SPA** apps
     * [Basic behaviours](#basic-behaviours)
     * [Directive to Directive communication](#directive-to-directive-communication)
     * [The Dot](#the-dot)
+    * [The link function](#the-link-function)
 * [Isolate Scope](#isolate-scope)
     * [Isolate Scope @](#isolate-scope-at)
     * [Isolate Scope =](#isolate-scope-equals)
     * [Isolate Scope &](#isolate-scope-and)
 * [Transclusion](#transclusion)
+* [Angular Element](#angular-element)
+    * [Compile](#compile)
 * [Filters](#filters)
 * [Views, Controllers and Scope](#views-controllers-and-scope)
     * [Creating Controllers](#creating-controllers)
@@ -24,6 +27,7 @@ Great for **SPA** apps
 * [Good Practices](#good-practices)
     * [Don't reference scope inside of the function](#dont-reference-scope-inside-of-the-function)
     * [Restrict custom directives to attributes](#restrict-custom-directives-to-attributes)
+* [Examples](#examples)
 
 ![General overview](/images/general_overview.png)
 
@@ -271,6 +275,28 @@ separate message
       </div>
     </div>
 
+### The link function
+
+    function link(scope, iElement, iAttrs, controller) { ... }
+
+The link function is responsible for registering DOM listeners as well as
+updating the DOM. It is executed after the template has been cloned. **This is
+where most of the directive logic will be put.**
+
+* scope - Scope - The scope to be used by the directive for registering watches.
+
+* iElement - instance element - The element where the directive is to be used.
+It is safe to manipulate the children of the element only in postLink function
+since the children have already been linked.
+
+* iAttrs - instance attributes - Normalized list of attributes declared on this
+element shared between all directive linking functions. See Attributes.
+
+* controller - a controller instance - A controller instance if at least one
+directive on the element defines a controller. The controller is shared among
+all the directives, which allows the directives to use the controllers as a
+communication channel.
+
 ## Isolate Scope
 
 ![Scopes](/images/scopes.png)
@@ -463,6 +489,73 @@ completely overwritten.
         template: '<div class='hero' ng-transclude>Hello</div>
       }
     });
+
+## Angular Element
+
+Let's examine how angular elements differ from elements in other frameworks
+(like JQ for example)
+
+    <dumb-password></dumb-password>
+
+    var app = angular.module('app', []);
+
+    app.directive('dumbPassword', function() {
+      return {
+        restrict: 'E',
+        replace: true,
+        template: '<div><input type='text' ng-model='model.input'><span></span></div>'
+        link: function (scope) {
+          scope.$watch('model.input', function (value) {
+            if (value === 'password') {
+              element.children(1).toggleClass('new-class')
+            }
+          })
+        }
+      }
+    });
+
+In the example above, dumb-password element is going to be totally replaced with
+input field because of the 'replace: true' option.
+
+Also, within the link function, we are watching for the input field the user is
+typing in and observing if it matches the word 'password'. If it does, we add
+the class 'new-class' to the 1st child element of that input field (wich is the
+'span' element in our example).
+
+Btw, this children(1) is a nasty way of looking for things. Typically people use
+.find() or something similar. But .find() is not supported within angular so you
+might use something like compile...
+
+### Compile
+
+The best way to understand the compile function is just to look at the example
+below:
+
+    <dumb-password></dumb-password>
+
+    var app = angular.module('app', []);
+
+    app.directive('dumbPassword', function() {
+
+      var valid_element = angular.element('<span></span>');
+
+      return {
+        restrict: 'E',
+        replace: true,
+        template: '<div><input type='text' ng-model='model.input'></div>'
+        compile: function(template_element) {
+          template_element.append(valid_element);
+          return function (scope, element) {
+            scope.$watch('model.input', function (value) {
+              if (value === 'password') {
+                valid_element.toggleClass('new-class')
+              }
+            })
+          }
+        }
+      }
+    });
+
 
 ## Filters
 
@@ -765,3 +858,7 @@ appears:
         }
       }
     });
+
+## Examples
+
+[Zippy with Angular](http://www.youtube.com/watch?v=JeuhhPlOZs0)
