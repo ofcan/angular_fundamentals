@@ -1,5 +1,8 @@
 # Angular Basics (and a small app)
 
+AngularJS is a Javascript MVC framework created by Google to build properly
+architectured and maintenable web applications.
+
 Angular is very very modular if you take advantage of it.
 Great for **SPA** apps
 
@@ -57,7 +60,7 @@ the folder of this app like so:
 
 ## Directives and Data Bindings
 
-They teach HTML new tricks
+Directives teach HTML new tricks!
 
     <html ng-app>
     <input type='text' ng-model='search_query' />
@@ -615,6 +618,11 @@ Angular provides A LOT of default filters:
 Templates you create with directives and such usually are much much more
 complicated for a single strings, so angular uses templateUrl!
 
+Angular uses XHR to render templates. XMLHttpRequest (XHR) is an API available
+in web browser scripting languages such as JavaScript. It is used to send HTTP
+or HTTPS requests directly to a web server and load the server response data
+directly back into the script
+
     <my-directive></my-directive>
 
     var app = angular.module('myApp', []);
@@ -631,6 +639,9 @@ inside my-directive div.
 
 On a more technical level, [the templateUrl is just looking up the template cache
 with the corresponding key.](http://www.egghead.io/video/boBm3AU-uX4)
+
+Angulars template cache stores templates in a cache (surprise, surprise) and
+makes everything run harder, better, faster, stronger.
 
 ## Views
 
@@ -1026,9 +1037,39 @@ right after defining module.
 
 ## Testing
 
-Most commonly used test suite for Angular is Karma + Jasmine.
+**Most commonly used test suite for Angular is Karma + Jasmine.**
 
-Here's an example. The wording is very similar to rspec tests in Rails:
+#### Karma
+
+[Karma](http://karma-runner.github.io/0.8/index.html) is a test runner for
+javascript (but it is not a testing framework). It runs on node.js and it is
+available as a node module via NPM.
+
+    npm install -g karma
+    karma start
+
+-g flag is just here to specify a global installation. In order to serve you,
+Karma needs to know about your project. That is done via a configuration file.
+The default option to create a config file is:
+
+    karma init my.conf.js
+
+When starting Karma, you can pass a path to the configuration file as an
+argument. By default, Karma will look for karma.conf.js in the current
+directory.
+
+    karma start --help
+    karma start my.conf.js
+
+#### Jasmine
+
+[Jasmine](http://pivotal.github.io/jasmine/) is a BDD testing framework for JS.
+It is also available as a node module, so to install it run:
+
+    npm install jasmine-node -g
+
+Here's an example of a typical Jasmine test. The wording is very similar to
+rspec tests in Rails:
 
     describe('filter', function () {
       beforeEach(module('myApp'));
@@ -1050,6 +1091,14 @@ Upper tests are tests for the following filter:
     });
 
 ## Good practices
+
+#### File structure
+
+There is a neat little repo on github from the angular core team titled
+[https://github.com/angular/angular-seed](angular seed) wich shows the
+recommended application skeleton for angular apps. Check it out!
+
+![File structure](/images/file_structure.png)
 
 #### Don't reference scope inside of the function
 
